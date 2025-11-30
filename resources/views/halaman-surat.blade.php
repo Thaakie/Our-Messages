@@ -46,7 +46,7 @@
                             <label class="block text-sm font-bold mb-2 text-gray-600">Dari Siapa?</label>
                             <input type="text" name="pengirim" 
                                 class="w-full border-2 border-rose-100 p-3 rounded-xl focus:outline-none focus:border-rose-400 transition"
-                                placeholder="Nama kamu / Juliana Gendis" value="{{ old('pengirim') }}">
+                                placeholder="Nama kamu / Anonim" value="{{ old('pengirim') }}">
                             @error('pengirim') 
                                 <p class="text-red-500 text-xs mt-1 italic">{{ $message }}</p> 
                             @enderror
