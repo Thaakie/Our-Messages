@@ -39,7 +39,7 @@
                          Tulis Surat
                     </h3>
                     
-                    <form action="{{ route('kirim.pesan') }}" method="POST">
+                    <form action="https://our-messages-production.up.railway.app/kirim" method="POST">
                         @csrf
                         
                         <div class="mb-4">
@@ -119,7 +119,7 @@
                             @endif
                         </div>
 
-                        <form action="{{ route('kirim.balasan', $p->id) }}" method="POST" class="mt-auto pt-2 border-t border-gray-100">
+                        <form action="https://our-messages-production.up.railway.app/reply/{{ $p->id }}" method="POST" class="mt-auto pt-2 border-t border-gray-100">
                             @csrf
                             <div class="flex gap-2 mb-2">
                                 <input type="text" name="nama_balas" placeholder="Aku/Kamu" class="w-1/3 text-xs border p-2 rounded focus:outline-none focus:border-rose-400" required>
