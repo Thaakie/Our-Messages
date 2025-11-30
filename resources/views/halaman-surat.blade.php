@@ -19,7 +19,7 @@
             <h2 class="text-4xl font-bold text-rose-500 mb-3">Ruang Bercerita Kita :3</h2>
             <p class="text-lg text-gray-500 max-w-2xl mx-auto">
                 Tuliskan apa yang ingin kamu sampaikan. Sederhana, namun bermakna. <br>
-                Pesan ini akan tersimpan abadi di sini.
+                Pesan ini akan tersimpan abadi di sini. <br> Another Personal Project / Test Deploy
         </div>
     </header>
 
