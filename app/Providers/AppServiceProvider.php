@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL; // <--- Bagian penting 1
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Bagian penting 2: Paksa HTTPS kalau di Railway (Production)
+        if($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
     }
 }
