@@ -3,33 +3,46 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Surat; // Jangan lupa panggil Modelnya
+use App\Models\Surat; 
 
 class SuratController extends Controller
 {
     // 1. Menampilkan halaman utama & semua pesan
     public function index() {
-        // Ambil data dari terbaru ke terlama
         $pesan = Surat::latest()->get(); 
         return view('halaman-surat', compact('pesan'));
     }
 
-    // 2. Menyimpan pesan baru
-// Ganti function store yang lama dengan yang ini
+    // 2. Menyimpan pesan baru (SUDAH DIAMANKAN 🛡️)
     public function store(Request $request) {
-        // Validasi dengan pesan custom
+        
+        // --- 🛡️ FITUR KEAMANAN: HONEYPOT ---
+        // Kalau field tersembunyi ini diisi, berarti dia BOT/SCRIPT!
+        if ($request->filled('bukan_robot')) {
+            // Kita tipu bot-nya: Bilang sukses, tapi aslinya GAK disimpan.
+            return redirect('/')->with('sukses', 'Surat berhasil terkirim! ;D');
+        }
+        // ------------------------------------
+
+        // Validasi Normal
         $request->validate([
             'pengirim' => 'required|max:30',
             'penerima' => 'required|max:30',
             'isi' => 'required',
         ], [
-            // Ini pesan error custom-nya
             'pengirim.required' => 'Nama pengirim harus diisi dong...',
             'penerima.required' => 'Suratnya buat siapa? Diisi ya...',
             'isi.required' => 'Jangan lupa tulis pesan manisnya di sini.',
         ]);
 
-        Surat::create($request->all());
+        // Simpan ke Database
+        // Kita sebutkan satu-satu field-nya biar aman & rapi
+        Surat::create([
+            'pengirim' => $request->pengirim,
+            'penerima' => $request->penerima,
+            'isi'      => $request->isi,
+            // 'bukan_robot' tidak kita masukkan ke sini
+        ]);
 
         return redirect('/')->with('sukses', 'Surat berhasil terkirim! ;D');
     }
@@ -41,9 +54,8 @@ class SuratController extends Controller
             'isi_balasan' => 'required',
         ]);
 
-        // Simpan ke tabel replies
         \App\Models\Reply::create([
-            'surat_id' => $id, // ID surat yang sedang dibalas
+            'surat_id' => $id, 
             'nama' => $request->nama_balas,
             'isi_balasan' => $request->isi_balasan,
         ]);
