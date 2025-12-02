@@ -97,25 +97,4 @@ class SuratController extends Controller
         return redirect()->back()->with('sukses', 'Balasan terkirim! 💬');
     }
 
-    public function hapusRahasia($id, $kunci) {
-    // 1. Cek Password (Ganti dengan password susah pilihanmu)
-    if ($kunci !== 'kucing_terbang_roket_123') {
-        abort(404); // Pura-pura halaman gak ada biar hacker bingung
-    }
-
-    // 2. Cari Surat
-    $surat = \App\Models\Surat::find($id);
-
-    if (!$surat) {
-        return "Surat gak ketemu bro.";
-    }
-
-    // 3. Hapus (Otomatis handle reply kalau migration bener, atau handle manual)
-    // Kalau migration gak pake cascade, hapus manual reply-nya:
-    // $surat->replies()->delete(); 
-    
-    $surat->delete();
-
-    return redirect('/')->with('sukses', 'Surat sampah berhasil dimusnahkan! 🗑️');
-}
 }
