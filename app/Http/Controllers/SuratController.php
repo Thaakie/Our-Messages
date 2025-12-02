@@ -58,17 +58,40 @@ class SuratController extends Controller
         return redirect('/')->with('sukses', 'Surat berhasil terkirim! ;D');
     }
 
-    // Fungsi untuk menyimpan balasan
+// Fungsi untuk menyimpan balasan (SUDAH DIAMANKAN 🛡️)
     public function simpanBalasan(Request $request, $id) {
+        
+        // --- 1. JEBAKAN HONEYPOT ---
+        // Pastikan nama input di HTML nanti adalah 'bukan_robot_reply'
+        if ($request->filled('bukan_robot_reply')) {
+            // Fake Success: Bilang terkirim padahal enggak
+            return redirect()->back()->with('sukses', 'Balasan terkirim! 💬');
+        }
+
+        // --- 2. CEK DUPLIKAT (Anti Spam Reply) ---
+        // Cek apakah user/ip ini pernah kirim balasan yg isinya SAMA PERSIS ke surat INI hari ini?
+        $isSpam = \App\Models\Reply::where('surat_id', $id)
+                    ->where('isi_balasan', $request->isi_balasan)
+                    ->where('nama', $request->nama_balas) // Cek nama juga
+                    ->where('created_at', '>', now()->subHours(1)) // Dalam 1 jam terakhir
+                    ->exists();
+
+        if ($isSpam) {
+            return redirect()->back()->withErrors(['isi_balasan' => 'Eits, balasan ini sudah pernah dikirim. Jangan nyepam ya! 😜']);
+        }
+
+        // --- 3. VALIDASI NORMAL ---
         $request->validate([
-            'nama_balas' => 'required',
-            'isi_balasan' => 'required',
+            'nama_balas' => 'required|max:20',
+            'isi_balasan' => 'required|max:200',
         ]);
 
+        // --- 4. SIMPAN ---
         \App\Models\Reply::create([
             'surat_id' => $id, 
             'nama' => $request->nama_balas,
             'isi_balasan' => $request->isi_balasan,
+            // 'bukan_robot_reply' tidak ikut disimpan
         ]);
 
         return redirect()->back()->with('sukses', 'Balasan terkirim! 💬');

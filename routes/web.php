@@ -11,4 +11,5 @@ Route::get('/', [SuratController::class, 'index']);
 // Tambahkan ->middleware('throttle:5,1') di ujungnya
 Route::post('/kirim', [SuratController::class, 'store'])->middleware('throttle:5,1');
 // Route untuk membalas pesan (Penting: ada {id} biar tau surat mana yg dibalas)
-Route::post('/reply/{id}', [SuratController::class, 'simpanBalasan'])->name('kirim.balasan');
+// Tambahkan middleware throttle juga di sini
+Route::post('/reply/{id}', [SuratController::class, 'simpanBalasan'])->middleware('throttle:10,1');

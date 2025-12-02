@@ -98,7 +98,7 @@
                                 </div>
                             </div>
                             <hr class="border-rose-50 my-2">
-                            <p class="text-gray-600 italic leading-relaxed text-lg font-medium">
+                            <p class="text-gray-600 italic leading-relaxed text-lg font-medium break-words">
                                 "{{ $p->isi }}"
                             </p>
                             <div class="text-right mt-2">
@@ -121,6 +121,7 @@
 
                         <form action="https://our-messages-production.up.railway.app/reply/{{ $p->id }}" method="POST" class="mt-auto pt-2 border-t border-gray-100">
                             @csrf
+                            <input type="text" name="bukan_robot_reply" value="" style="display:none" autocomplete="off" tabindex="-1">
                             <div class="flex gap-2 mb-2">
                                 <input type="text" name="nama_balas" placeholder="Aku/Kamu" class="w-1/3 text-xs border p-2 rounded focus:outline-none focus:border-rose-400" required>
                                 <input type="text" name="isi_balasan" placeholder="Balas pesan ini..." class="w-2/3 text-xs border p-2 rounded focus:outline-none focus:border-rose-400" required>
