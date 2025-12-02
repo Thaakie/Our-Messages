@@ -22,7 +22,18 @@ class SuratController extends Controller
             // Kita tipu bot-nya: Bilang sukses, tapi aslinya GAK disimpan.
             return redirect('/')->with('sukses', 'Surat berhasil terkirim! ;D');
         }
-        // ------------------------------------
+        // ------------------------------------\
+
+        // 2. 🔥 BARU: CEK DUPLIKAT 🔥
+    // Cek apakah IP ini sudah pernah kirim pesan yang ISINYA SAMA PERSIS hari ini?
+    $isSpam = \App\Models\Surat::where('isi', $request->isi)
+                ->where('created_at', '>', now()->subHours(24)) // Cek 24 jam terakhir
+                ->exists();
+
+    if ($isSpam) {
+        // Kalau isinya sama persis, kita tolak halus
+        return redirect()->back()->withErrors(['isi' => 'Pesan ini sudah pernah dikirim sebelumnya. Jangan nyepam ya! 😜']);
+    }
 
         // Validasi Normal
         $request->validate([
