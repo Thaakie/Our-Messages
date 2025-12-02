@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Surat; 
+use App\Models\Surat;
+use App\Models\Reply; // Tambahkan ini biar rapi
+use Illuminate\Support\Facades\Http; // Wajib ada untuk kirim ke Discord
 
 class SuratController extends Controller
 {
@@ -13,29 +15,39 @@ class SuratController extends Controller
         return view('halaman-surat', compact('pesan'));
     }
 
-    // 2. Menyimpan pesan baru (SUDAH DIAMANKAN 🛡️)
+    // 2. Menyimpan pesan baru (Full Security + Discord 🛡️)
     public function store(Request $request) {
         
-        // --- 🛡️ FITUR KEAMANAN: HONEYPOT ---
-        // Kalau field tersembunyi ini diisi, berarti dia BOT/SCRIPT!
+        // --- TAHAP 1: CEK HONEYPOT (BOT BODOH) ---
         if ($request->filled('bukan_robot')) {
-            // Kita tipu bot-nya: Bilang sukses, tapi aslinya GAK disimpan.
+            // 🔥 Kirim Laporam ke Discord
+            try {
+                Http::post('Mhttps://discord.com/api/webhooks/1445421976326766722/Wf8TKiH14vMAgaVrJMxL65TOiFCw9LObwZYUmMU1DeWWJpf8LdOG0oVT_9sM8aNQeOCI', [
+                    'content' => "🚨 **ALARM HONEYPOT!**\nAda Bot (IP: {$request->ip()}) kena jebakan input tersembunyi! 🍯"
+                ]);
+            } catch (\Exception $e) { } // Abaikan jika Discord error
+
+            // Fake Success
             return redirect('/')->with('sukses', 'Surat berhasil terkirim! ;D');
         }
-        // ------------------------------------\
 
-        // 2. 🔥 BARU: CEK DUPLIKAT 🔥
-    // Cek apakah IP ini sudah pernah kirim pesan yang ISINYA SAMA PERSIS hari ini?
-    $isSpam = \App\Models\Surat::where('isi', $request->isi)
-                ->where('created_at', '>', now()->subHours(24)) // Cek 24 jam terakhir
-                ->exists();
+        // --- TAHAP 2: CEK DUPLIKAT (BOT PINTAR) ---
+        $isSpam = Surat::where('isi', $request->isi)
+                    ->where('created_at', '>', now()->subHours(24))
+                    ->exists();
 
-    if ($isSpam) {
-        // Kalau isinya sama persis, kita tolak halus
-        return redirect()->back()->withErrors(['isi' => 'Pesan ini sudah pernah dikirim sebelumnya. Jangan nyepam ya! 😜']);
-    }
+        if ($isSpam) {
+            // 🔥 Kirim Laporam ke Discord
+            try {
+                Http::post('MASUKKAN_URL_WEBHOOK_DISCORD_KAMU_DISINI', [
+                    'content' => "⚠️ **ALARM SPAM DUPLIKAT!**\nIP: {$request->ip()} mencoba kirim pesan yang sama persis! 👯"
+                ]);
+            } catch (\Exception $e) { }
 
-        // Validasi Normal
+            return redirect()->back()->withErrors(['isi' => 'Pesan ini sudah pernah dikirim. Jangan nyepam ya! 😜']);
+        }
+
+        // --- TAHAP 3: VALIDASI DATA ---
         $request->validate([
             'pengirim' => 'required|max:30',
             'penerima' => 'required|max:30',
@@ -46,34 +58,30 @@ class SuratController extends Controller
             'isi.required' => 'Jangan lupa tulis pesan manisnya di sini.',
         ]);
 
-        // Simpan ke Database
-        // Kita sebutkan satu-satu field-nya biar aman & rapi
+        // --- TAHAP 4: SIMPAN KE DATABASE ---
         Surat::create([
             'pengirim' => $request->pengirim,
             'penerima' => $request->penerima,
             'isi'      => $request->isi,
-            // 'bukan_robot' tidak kita masukkan ke sini
+            // 'bukan_robot' otomatis dibuang karena tidak disebut disini
         ]);
 
         return redirect('/')->with('sukses', 'Surat berhasil terkirim! ;D');
     }
 
-// Fungsi untuk menyimpan balasan (SUDAH DIAMANKAN 🛡️)
+    // 3. Menyimpan balasan (Full Security 🛡️)
     public function simpanBalasan(Request $request, $id) {
         
-        // --- 1. JEBAKAN HONEYPOT ---
-        // Pastikan nama input di HTML nanti adalah 'bukan_robot_reply'
+        // --- 1. JEBAKAN HONEYPOT REPLY ---
         if ($request->filled('bukan_robot_reply')) {
-            // Fake Success: Bilang terkirim padahal enggak
             return redirect()->back()->with('sukses', 'Balasan terkirim! 💬');
         }
 
-        // --- 2. CEK DUPLIKAT (Anti Spam Reply) ---
-        // Cek apakah user/ip ini pernah kirim balasan yg isinya SAMA PERSIS ke surat INI hari ini?
-        $isSpam = \App\Models\Reply::where('surat_id', $id)
+        // --- 2. CEK DUPLIKAT REPLY ---
+        $isSpam = Reply::where('surat_id', $id)
                     ->where('isi_balasan', $request->isi_balasan)
-                    ->where('nama', $request->nama_balas) // Cek nama juga
-                    ->where('created_at', '>', now()->subHours(1)) // Dalam 1 jam terakhir
+                    ->where('nama', $request->nama_balas)
+                    ->where('created_at', '>', now()->subHours(1))
                     ->exists();
 
         if ($isSpam) {
@@ -86,15 +94,13 @@ class SuratController extends Controller
             'isi_balasan' => 'required|max:200',
         ]);
 
-        // --- 4. SIMPAN ---
-        \App\Models\Reply::create([
+        // --- 4. SIMPAN REPLY ---
+        Reply::create([
             'surat_id' => $id, 
             'nama' => $request->nama_balas,
             'isi_balasan' => $request->isi_balasan,
-            // 'bukan_robot_reply' tidak ikut disimpan
         ]);
 
         return redirect()->back()->with('sukses', 'Balasan terkirim! 💬');
     }
-
 }
