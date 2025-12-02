@@ -39,7 +39,7 @@ class SuratController extends Controller
         if ($isSpam) {
             // 🔥 Kirim Laporam ke Discord
             try {
-                Http::post('MASUKKAN_URL_WEBHOOK_DISCORD_KAMU_DISINI', [
+                Http::post('https://discord.com/api/webhooks/1445421976326766722/Wf8TKiH14vMAgaVrJMxL65TOiFCw9LObwZYUmMU1DeWWJpf8LdOG0oVT_9sM8aNQeOCI', [
                     'content' => "⚠️ **ALARM SPAM DUPLIKAT!**\nIP: {$request->ip()} mencoba kirim pesan yang sama persis! 👯"
                 ]);
             } catch (\Exception $e) { }
