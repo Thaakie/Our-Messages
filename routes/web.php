@@ -14,3 +14,7 @@ Route::post('/kirim', [SuratController::class, 'store'])->middleware('throttle:5
 // Tambahkan middleware throttle juga di sini
 Route::post('/reply/{id}', [SuratController::class, 'simpanBalasan'])->middleware('throttle:10,1');
 // URL-nya: website.com/hapus-paksa/{id_surat}/{password_rahasia}
+// Route Rahasia Pemberi Token
+Route::get('/ambil-token-rahasia', function () {
+    return response()->json(['token' => csrf_token()]);
+});

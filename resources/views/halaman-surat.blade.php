@@ -40,8 +40,11 @@
                     </h3>
                     
                     <form action="https://our-messages-production.up.railway.app/kirim" method="POST">
-                        @csrf
+                        
+                        <input type="hidden" name="_token" id="csrf_token_utama" value="">
+
                         <input type="text" name="bukan_robot" value="" style="display:none" autocomplete="off" tabindex="-1">
+                        
                         <div class="mb-4">
                             <label class="block text-sm font-bold mb-2 text-gray-600">Dari Siapa?</label>
                             <input type="text" name="pengirim" 
@@ -120,7 +123,9 @@
                         </div>
 
                         <form action="https://our-messages-production.up.railway.app/reply/{{ $p->id }}" method="POST" class="mt-auto pt-2 border-t border-gray-100">
-                            @csrf
+                            
+                            <input type="hidden" name="_token" class="csrf_token_reply" value="">
+
                             <input type="text" name="bukan_robot_reply" value="" style="display:none" autocomplete="off" tabindex="-1">
                             <div class="flex gap-2 mb-2">
                                 <input type="text" name="nama_balas" placeholder="Aku/Kamu" class="w-1/3 text-xs border p-2 rounded focus:outline-none focus:border-rose-400" required>
@@ -161,7 +166,27 @@
         </div>
     </footer>
 
-</body>
-</html>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Ambil token dari route rahasia yang kita buat
+            fetch('/ambil-token-rahasia')
+                .then(response => response.json())
+                .then(data => {
+                    // 1. Isi token ke Form Utama
+                    const tokenUtama = document.getElementById('csrf_token_utama');
+                    if(tokenUtama) tokenUtama.value = data.token;
+
+                    // 2. Isi token ke SEMUA Form Balasan (Reply)
+                    const tokenReplies = document.querySelectorAll('.csrf_token_reply');
+                    tokenReplies.forEach(input => {
+                        input.value = data.token;
+                    });
+
+                    console.log("System Ready: Token Loaded via JS 🛡️");
+                })
+                .catch(error => console.error("Error loading security token:", error));
+        });
+    </script>
+
 </body>
 </html>
