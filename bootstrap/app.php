@@ -12,6 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         //
+        // 🔥 TAMBAHKAN BARIS INI (PENTING!) 🔥
+        // Ini bikin Laravel bisa baca IP asli penyerang di balik Railway
+        $middleware->trustProxies(at: '*');
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
